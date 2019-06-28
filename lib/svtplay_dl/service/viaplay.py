@@ -34,6 +34,10 @@ class Viaplay(Service, OpenGraphThumbMixin):
         unable to extract the ID at all.
         """
         if url:
+            parse = urlparse(url)
+            match = re.search(r'/[a-zA-Z0-9_-]+/(\d+)$', parse.path)
+            if match:
+                return match.group(1)
             html_data = self.http.request("get", url).text
         else:
             html_data = self.get_urldata()
@@ -199,7 +203,22 @@ class Viaplay(Service, OpenGraphThumbMixin):
                 for i in janson["formatPage"]["format"]["seasons"]:
                     seasons.append(i["seasonNumber"])
 
+        if not seasons:
+            match = self._season_selector(self.get_urldata())
+            if match:
+                tags = re.findall('<a href="([^"]+)"', match.group(1))
+                for i in tags:
+                    seasons.append(i)
+
+        if not seasons:
+            match = self._series_by_category(self.get_urldata())
+            if match:
+                tags = list(set(re.findall('<a href="([^"]+)"', match.group(1))))
+                for i in tags:
+                     seasons.append(i)
+
         episodes = self._grab_episodes(config, seasons)
+
         if config.get("all_last") > 0:
             return episodes[-config.get("all_last"):]
         return sorted(episodes)
@@ -227,6 +246,22 @@ class Viaplay(Service, OpenGraphThumbMixin):
                         if "clip" in janson["formatPage"]["format"]["videos"][str(i)]:
                             for n in janson["formatPage"]["format"]["videos"][str(i)]["clip"]:
                                 episodes = self._videos_to_list(n["sharingUrl"], n["id"], episodes)
+
+        baseurl = "{0}://{1}".format(urlparse(self.url).scheme, urlparse(self.url).netloc) 
+        for season in seasons:
+            url = "{0}{1}".format(baseurl, season)
+            res = self.http.get(url)
+            if res:
+                match = self._episodes_selector(res.text)
+                if match:
+                    tags = re.findall('<a href="([^"]+)"', match.group(1))
+                    for i in tags:
+                        url = "{0}{1}".format(baseurl, i)
+                        vid = self._get_video_id(url)
+                        episodes = self._videos_to_list(url, vid, episodes)
+                    if not episodes:
+                        episodes.extend(self._grab_episodes(config, tags)) 
+
         return episodes
 
     def _isswe(self, url):
@@ -239,6 +274,15 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
     def _conentpage(self, data):
         return re.search(r'=({"sportsPlayer.*}); window.__config', data)
+
+    def _season_selector(self, data):
+        return re.search(r'<div class="Slider_container Slider_container_seasonSelector">(.+<\/div>)<article', data)
+
+    def _episodes_selector(self, data):
+        return re.search(r'<section data-componentname="group-episodes" class="BlockView_container">(.+?)</section>', data)
+
+    def _series_by_category(self, data):
+        return re.search(r'<section data-componentname="series-by-category" class="BlockView_container container_series">(.+?)</section>', data)
 
     def _videos_to_list(self, url, vid, episodes):
         dataj = json.loads(self._get_video_data(vid).text)
