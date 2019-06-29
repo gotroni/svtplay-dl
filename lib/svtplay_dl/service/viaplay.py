@@ -206,14 +206,14 @@ class Viaplay(Service, OpenGraphThumbMixin):
         if not seasons:
             match = self._season_selector(self.get_urldata())
             if match:
-                tags = re.findall('<a href="([^"]+)"', match.group(1))
+                tags = self._findAllAHrefValues(match.group(1))
                 for i in tags:
                     seasons.append(i)
 
         if not seasons:
             match = self._series_by_category(self.get_urldata())
             if match:
-                tags = list(set(re.findall('<a href="([^"]+)"', match.group(1))))
+                tags = list(set(self._findAllAHrefValues(match.group(1))))
                 for i in tags:
                      seasons.append(i)
 
@@ -254,7 +254,7 @@ class Viaplay(Service, OpenGraphThumbMixin):
             if res:
                 match = self._episodes_selector(res.text)
                 if match:
-                    tags = re.findall('<a href="([^"]+)"', match.group(1))
+                    tags = self._findAllAHrefValues(match.group(1))
                     for i in tags:
                         url = "{0}{1}".format(baseurl, i)
                         vid = self._get_video_id(url)
@@ -283,6 +283,9 @@ class Viaplay(Service, OpenGraphThumbMixin):
 
     def _series_by_category(self, data):
         return re.search(r'<section data-componentname="series-by-category" class="BlockView_container container_series">(.+?)</section>', data)
+
+    def _findAllAHrefValues(self, data):
+        return re.findall('<a href="([^"]+)"', data)
 
     def _videos_to_list(self, url, vid, episodes):
         dataj = json.loads(self._get_video_data(vid).text)
