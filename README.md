@@ -1,5 +1,5 @@
 # svtplay-dl
-[![Build Status Appveyor](https://ci.appveyor.com/api/projects/status/github/spaam/svtplay-dl)](https://ci.appveyor.com/api/projects/status/github/spaam/svtplay-dl)
+[![Build Status Appveyor](https://ci.appveyor.com/api/projects/status/github/spaam/svtplay-dl?svg=true)](https://ci.appveyor.com/project/spaam/svtplay-dl)
 [![Build Status Travis](https://travis-ci.org/spaam/svtplay-dl.svg)](https://travis-ci.org/spaam/svtplay-dl/)
 
 ## Installation
@@ -15,7 +15,7 @@ You will need to run `brew install ffmpeg` or `brew install libav` afterwards, i
 
 ### Debian and Ubuntu
 
-svtplay-dl is available in Debian Jessie and later and on Ubuntu 14.04 and later, which means you can install it straight away using apt. The version in their repo is often old and thus we **strongly** recommend using our own apt repo, which always include the latest version. The svtplay-dl repo for Debian / Ubuntu can be found at [apt.svtplay-dl.se](https://apt.svtplay-dl.se/). 
+svtplay-dl is available in Debian strech and later and on Ubuntu 16.04 and later, which means you can install it straight away using apt. The version in their repo is often old and thus we **strongly** recommend using our own apt repo, which always include the latest version. The svtplay-dl repo for Debian / Ubuntu can be found at [apt.svtplay-dl.se](https://apt.svtplay-dl.se/).
 
 ##### Add the release PGP keys:
 ```
@@ -23,12 +23,12 @@ svtplay-dl is available in Debian Jessie and later and on Ubuntu 14.04 and later
 ```
 
 ##### Add the "release" channel to your APT sources:
-```  
+```
     echo "deb https://apt.svtplay-dl.se/ svtplay-dl release" | sudo tee /etc/apt/sources.list.d/svtplay-dl.list
 ```
-    
+
 ##### Update and install svtplay-dl:
-``` 
+```
     sudo apt-get update
 
     sudo apt-get install svtplay-dl
@@ -36,7 +36,7 @@ svtplay-dl is available in Debian Jessie and later and on Ubuntu 14.04 and later
 
 ### Solus
 
-svtplay-dl is avaliable in the stable repository of [Solus](https://solus-project.com/) and can be installed by running:
+svtplay-dl is avaliable in the [Solus](https://getsol.us.com/) repository and can be installed by simply running:
 
 ```
 sudo eopkg it svtplay-dl
@@ -61,7 +61,7 @@ If you want to build your own Windows binaries:
     pip3 install svtplay-dl
 ```
 
-### Any UNIX (Linux, BSD, macOS, etc.) 
+### Any UNIX (Linux, BSD, macOS, etc.)
 
 ##### Download with curl
 ```
@@ -87,12 +87,12 @@ svtplay-dl requires the following additional tools and libraries. They
 are usually available from your distribution’s package repositories. If
 you don’t have them, some features will not be working.
 
--  [Python](https://www.python.org/) 3.4 or higher
--  [cryptography](https://cryptography.io/en/latest/) to download encrypted HLS streams
+-  [Python](https://www.python.org) 3.4 or higher
+-  [cryptography](https://cryptography.io/en/latest) to download encrypted HLS streams
 -  [PyYaml](https://github.com/yaml/pyyaml) for configure file
--  [Requests](http://www.python-requests.org/)
+-  [Requests](https://2.python-requests.org)
 -  [PySocks](https://github.com/Anorov/PySocks) to enable proxy support
--  [ffmpeg](https://ffmpeg.org) or [avconv](https://libav.org/) for postprocessing and/or for DASH streams
+-  [ffmpeg](https://ffmpeg.org) or [avconv](https://libav.org) for postprocessing and/or for DASH streams ([ffmpeg](https://ffmpeg.zeranoe.com) for Windows)
 
 ##### To install it, run:
 

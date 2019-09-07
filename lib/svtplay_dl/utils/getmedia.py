@@ -1,20 +1,25 @@
-import os
-import sys
 import copy
 import logging
-from shutil import which
+import os
+import sys
 from datetime import datetime
+from shutil import which
 
-from svtplay_dl.service import service_handler, Generic
-from svtplay_dl.service.services import sites, Raw
-from svtplay_dl.fetcher import VideoRetriever
-from svtplay_dl.subtitle import subtitle
-from svtplay_dl.utils.output import filename, formatname
-from svtplay_dl.postprocess import postprocess
-from svtplay_dl.utils.stream import select_quality, list_quality
-from svtplay_dl.utils.text import exclude
 from svtplay_dl.error import UIException
-from svtplay_dl.utils.nfo import write_nfo_episode, write_nfo_tvshow
+from svtplay_dl.fetcher import VideoRetriever
+from svtplay_dl.postprocess import postprocess
+from svtplay_dl.service import Generic
+from svtplay_dl.service import service_handler
+from svtplay_dl.service.services import Raw
+from svtplay_dl.service.services import sites
+from svtplay_dl.subtitle import subtitle
+from svtplay_dl.utils.nfo import write_nfo_episode
+from svtplay_dl.utils.nfo import write_nfo_tvshow
+from svtplay_dl.utils.output import filename
+from svtplay_dl.utils.output import formatname
+from svtplay_dl.utils.stream import list_quality
+from svtplay_dl.utils.stream import select_quality
+from svtplay_dl.utils.text import exclude
 
 
 def get_multiple_media(urls, config):
@@ -37,7 +42,7 @@ def get_media(url, options, version="Unknown"):
         url = "http://%s" % url
 
     if options.get("verbose"):
-        logging.debug("version: {0}".format(version))
+        logging.debug("version: {}".format(version))
 
     stream = service_handler(sites, options, url)
     if not stream:
@@ -51,12 +56,12 @@ def get_media(url, options, version="Unknown"):
             sys.exit(2)
 
     if options.get("all_episodes") or stream.config.get("all_episodes"):
-        get_all_episodes(stream, url)
+        get_all_episodes(stream, url, options)
     else:
         get_one_media(stream)
 
 
-def get_all_episodes(stream, url):
+def get_all_episodes(stream, url, options):
     name = os.path.dirname(formatname({"basedir": True}, stream.config))
 
     if name and os.path.isfile(name):
@@ -81,8 +86,9 @@ def get_all_episodes(stream, url):
         logging.info("Episode %d of %d", idx + 1, len(episodes))
         logging.info("Url: %s", o)
 
-        # get_one_media overwrites options.output...
-        get_one_media(substream)
+        if not (options.get("get_url") and options.get("get_only_episode_url")):
+            # get_one_media overwrites options.output...
+            get_one_media(substream)
 
 
 def get_one_media(stream):
@@ -91,7 +97,7 @@ def get_one_media(stream):
         return
 
     if stream.config.get("merge_subtitle"):
-        if not which('ffmpeg'):
+        if not which("ffmpeg"):
             logging.error("--merge-subtitle needs ffmpeg. Please install ffmpeg.")
             logging.info("https://ffmpeg.org/download.html")
             sys.exit(2)
@@ -133,12 +139,11 @@ def get_one_media(stream):
     except (ValueError, TypeError, KeyError):
         pub_date = None
     if after_date is not None and pub_date is not None and pub_date.date() < after_date.date():
-        logging.info("Video {}S{}E{} skipped since published {} before {}. ".format(
-            stream.output["title"],
-            stream.output["season"],
-            stream.output["episode"],
-            pub_date.date(),
-            after_date.date()))
+        logging.info(
+            "Video {}S{}E{} skipped since published {} before {}. ".format(
+                stream.output["title"], stream.output["season"], stream.output["episode"], pub_date.date(), after_date.date()
+            )
+        )
         return
 
     if stream.config.get("require_subtitle") and not subs:
